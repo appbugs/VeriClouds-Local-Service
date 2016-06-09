@@ -1,0 +1,147 @@
+<html>
+<head>
+<title>Welcome to VeriClouds Local Service</title>
+
+<link rel="stylesheet" type="text/css" href="style.css" />
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+<script type="text/javascript">
+
+function show_records(records,infoElement,resultElement) {
+    if (typeof records != 'undefined') {
+        infoElement.slideDown().html('' + records.length + ' records have been found');
+				
+        for (var i=0;i<records.length;i++) {
+            var record = records[i];
+            var index = i+1;
+			var pass_b = record.pass_b;
+			if (pass_b.length > 15) pass_b = pass_b.substring(0,15)+'...';
+			resultElement.append('<tr><td>'+index.toString()+'</td><td>'+record.email+'</td><td title="'+record.pass_b+'">'+pass_b+'</td><td>'+record.pass_bm+'</td></tr>');
+        }
+	} else { //no record
+		infoElement.slideDown().html('No record has been found');
+	}
+}
+
+$(document).ready(function(){
+	jQuery.ajaxSetup({async:true}); //async ajax
+    $( "form" ).submit(function () {
+        if (this.id == 'check_userid') {
+            $('#info_userid_check').slideDown().html(""); //clean info
+			$('#result_userid tbody').empty();
+			
+            var userid=$('#userid').val();
+            if(userid=="") {
+                $('#info_userid_check').slideDown().html("<span>Please enter user ID</span>");
+                $('#userid').focus();
+                return false;
+            }
+
+			$('#info_userid_check').slideDown().html("<span>loading data...</span>");
+            $.get( 'api.php?mode=query_leaked_password_by_userid&userid='+userid, function( data ) {
+                var obj = jQuery.parseJSON( data );
+                if (obj.result === 'succeeded') {
+                    show_records(obj.records,$('#info_userid_check'),$('#result_userid tbody'));
+                } else {
+                    $('#info_userid_check').slideDown().html(obj.reason);
+                }
+            })
+            .fail(function() {
+                $('#info_userid_check').slideDown().html("query failed. try again later");
+            });
+        } else if (this.id == 'check_domain') {
+            $('#info_domain_check').slideDown().html(""); //clean info
+			$('#result_domain tbody').empty();
+			
+            var domain=$('#domain').val();
+            if(domain=="") {
+                $('#info_domain_check').slideDown().html("<span>Please enter an email domain</span>");
+                $('#domain').focus();
+                return false;
+            }
+
+			$('#info_domain_check').slideDown().html("<span>loading data...</span>");
+            $.get( 'api.php?mode=query_leaked_password_by_domain&domain='+domain, function( data ) {
+                var obj = jQuery.parseJSON( data );
+                if (obj.result === 'succeeded') {
+                    show_records(obj.records,$('#info_domain_check'),$('#result_domain tbody'));
+                } else {
+                    $('#info_domain_check').slideDown().html(obj.reason);
+                }
+            })
+            .fail(function() {
+                $('#info_domain_check').slideDown().html("query failed. try again later");
+            });
+        }
+        
+        return false;
+    });
+});
+</script>
+</head>
+<body>
+
+    <div id="page-wrap">
+		<h2>Welcome to VeriClouds Local Service</h2>
+		<p></p>
+		<p>VeriClouds Local Service encrypts and syncs the VeriClouds cloud database of compromised credentials to your local environment. All of your queries are fully served in local without disclosing any data to VeriClouds cloud.</p> 
+        <p></p>
+		<h2>Demo 1: Check User ID for Compromised Passwords</h2>
+		<div id="contact-area">
+			
+			<form method="post" action="#" id="check_userid">
+				<label for="userid">User ID or email</label>
+				<input type="text" name="userid" id="userid" />
+
+				<input type="submit" name="submit1" id="submit1" value="Check User ID" class="submit-button" />
+			</form>
+			
+			<div style="clear: both;">
+            <p id="info_userid_check"></p>
+            <table width="100%" id="result_userid">
+			<thead>
+                <tr>
+                    <th><b>Index</b></th>
+                    <th><b>User ID</b></th>
+                    <th><b>Bcrypt Hash</b></th>
+                    <th><b>Bcrypt MD5 Hash</b></th>
+                </tr>
+			</thead>
+			<tbody>
+			</tbody>
+            </table>
+            </div>
+			
+		</div>
+    </div>
+    <div id="page-wrap">
+        <h2>Demo 2: Check Email Domain for Compromised Passwords </h2>
+		<div id="contact-area">
+			
+			<form method="post" action="#" id="check_domain">
+				<label for="domain">Email Domain</label>
+				<input type="text" name="domain" id="domain" />
+
+				<input type="submit" name="submit2" id="submit2" value="Check Domain" class="submit-button" />
+			</form>
+			
+			<div style="clear: both;">
+            <p id="info_domain_check"></p>
+            <table width="100%" id="result_domain">
+			<thead>
+                <tr>
+                    <th><b>Index</b></th>
+                    <th><b>User ID</b></th>
+                    <th><b>Bcrypt Hash</b></th>
+                    <th><b>Bcrypt MD5 Hash</b></th>
+                </tr>
+			</thead>
+			<tbody>
+			</tbody>
+            </table>
+            </div>
+			
+		</div>
+	</div>
+
+</body>
+</html>
