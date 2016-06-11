@@ -10,6 +10,9 @@ if ($mode == 'query_leaked_password_by_userid') {
 	$domain = $_GET['domain'];
 	$results = query_leaked_password_by_domain($domain);
 	echo json_encode($results);
+} else if ($mode == 'get_db_stats') {
+    $results = get_db_stats();
+	echo json_encode($results);
 }
 
 ?>

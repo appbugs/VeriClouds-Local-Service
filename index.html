@@ -75,6 +75,16 @@ $(document).ready(function(){
         
         return false;
     });
+    
+    $.get( 'api.php?mode=get_db_stats', function( data ) {
+            var obj = jQuery.parseJSON( data );
+            if (obj.result === 'succeeded') {
+                $('#db_stats').slideDown().html("<b>"+obj.stats.total+"</b> records in local db");
+            }
+        })
+        .fail(function() {
+            $('#info_userid_check').slideDown().html("query failed. try again later");
+        });
 });
 </script>
 </head>
@@ -84,6 +94,8 @@ $(document).ready(function(){
 		<h2>Welcome to VeriClouds Local Service</h2>
 		<p></p>
 		<p>VeriClouds Local Service encrypts and syncs the VeriClouds cloud database of compromised credentials to your local environment. All of your queries are fully served in local without disclosing any data to VeriClouds cloud.</p> 
+        <p></p>
+        <p id="db_stats"></p>
         <p></p>
 		<h2>Demo 1: Check User ID for Compromised Passwords</h2>
 		<div id="contact-area">

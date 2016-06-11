@@ -23,7 +23,7 @@ function db_connect() {
 db_connect();
 
 function query_leaked_password_by_userid($userid) {
-	GLOBAL $link,$big_leaked_accounts_tables;
+	GLOBAL $link;
 	
 	$clean_userid = strtolower(mysqli_real_escape_string($link,$userid));
 	$link->query('SET CHARACTER SET utf8');  //solve the bug which return null when calling json_encode. more details see http://stackoverflow.com/questions/1972006/json-encode-is-returning-null
@@ -39,7 +39,7 @@ function query_leaked_password_by_userid($userid) {
 }
 
 function query_leaked_password_by_domain($domain) {
-	GLOBAL $link,$big_leaked_accounts_tables;
+	GLOBAL $link;
 	
 	$clean_domain = strtolower(mysqli_real_escape_string($link,$domain));
 	$clean_domain_rev = strrev($clean_domain);
@@ -55,6 +55,21 @@ function query_leaked_password_by_domain($domain) {
 	}
 	
 	return array('result'=>'succeeded','records'=>$passwords);
+}
+
+function get_db_stats() {
+	GLOBAL $link;
+
+    $query = 'SELECT COUNT(*) AS total FROM vericlouds_replica.leaked_accounts_hashed;';
+	//echo $query;
+	$result = $link->query($query);
+    $stats = array();
+	if ($line = $result->fetch_assoc()) {
+		$stats['total'] = $line['total'];
+    } else {
+        $stats['total'] = -1;
+    }
+	return array('result'=>'succeeded','stats'=>$stats);
 }
 
 ?>
